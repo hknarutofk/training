@@ -45,12 +45,12 @@ public class CodeGenerator {
         // dsc.setSchemaName("public");
         dsc.setDriverName("com.mysql.jdbc.Driver");
         dsc.setUsername("root");
-        dsc.setPassword("abcDEF123!@#$");
+        dsc.setPassword("abcDEF123___");
         mpg.setDataSource(dsc);
 
         // 包配置
         PackageConfig pc = new PackageConfig();
-        pc.setModuleName("todo");
+        // pc.setModuleName("todo");
         pc.setParent("com.example.demo");
         mpg.setPackageInfo(pc);
 
@@ -119,7 +119,7 @@ public class CodeGenerator {
         // strategy.setSuperControllerClass("你自己的父类控制器,没有就不用设置!");
         // 写于父类中的公共字段
         strategy.setSuperEntityColumns("id");
-        strategy.setInclude("todo");
+        // strategy.setInclude("todo");
         strategy.setControllerMappingHyphenStyle(true);
         strategy.setTablePrefix(pc.getModuleName() + "_");
         mpg.setStrategy(strategy);

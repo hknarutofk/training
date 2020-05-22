@@ -1,17 +1,20 @@
 package com.example.demo.service.impl;
 
-import org.springframework.stereotype.Component;
-
+import com.example.demo.entity.Todo;
+import com.example.demo.mapper.TodoMapper;
+import com.example.demo.service.ITodoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.example.demo.dao.entity.Todo;
-import com.example.demo.dao.mapper.TodoMapper;
-import com.example.demo.service.TodoService;
+import org.springframework.stereotype.Service;
 
 /**
+ * <p>
+ * 代办项目 服务实现类
+ * </p>
+ *
  * @author yeqiang
- * @since 5/21/20 4:02 PM
+ * @since 2020-05-22
  */
-@Component
-public class TodoServiceImpl extends ServiceImpl<TodoMapper, Todo> implements TodoService {
+@Service
+public class TodoServiceImpl extends ServiceImpl<TodoMapper, Todo> implements ITodoService {
 
 }

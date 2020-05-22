@@ -5,6 +5,6 @@ spring:
     password: abcDEF123___
     driver-class-name: com.mysql.jdbc.Driver
   jackson:
-    default-property-inclusion: NON_NULL
-    time-zone: GMT+8
-    date-format: yyyy-MM-dd HH:mm:ss
+    local-date-time-format: yyyy-MM-dd HH:mm:ss
+    local-date-format: yyyy-MM-dd
+    local-time-format: HH:mm:ss
