@@ -1,13 +1,19 @@
 package com.example.demo;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-@SpringBootTest
+import org.junit.jupiter.api.Test;
+
 class DemoApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    void contextLoads() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd hh:mm:ss");
+        Date d = new Date(1263370065244368898l);
+        System.out.println(d);
+        System.out.println(simpleDateFormat.format(d));
+        System.out.println(System.currentTimeMillis());
+    }
 
 }
