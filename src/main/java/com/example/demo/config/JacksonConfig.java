@@ -18,6 +18,9 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 
+/**
+ * 用于提供LocalDateTime类型序列化操作
+ */
 @Configuration
 public class JacksonConfig {
 
