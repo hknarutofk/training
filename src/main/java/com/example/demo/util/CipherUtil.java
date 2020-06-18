@@ -93,6 +93,14 @@ public class CipherUtil {
         return loadPublicKey(keyBytes, algorithm);
     }
 
+    public static PublicKey loadPublicKeyFromPemString(String pemString, String algorithm)
+        throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+        String base64String = pemString.replaceAll("\\-\\-\\-\\-\\-[A-Z ]+\\-\\-\\-\\-\\-", "");
+        log.debug(base64String);
+        byte[] keyBytes = Base64.getMimeDecoder().decode(base64String);
+        return loadPublicKey(keyBytes, algorithm);
+    }
+
     public static PrivateKey loadPrivateKey(byte[] keyBytes, String algorithm)
         throws NoSuchAlgorithmException, InvalidKeySpecException {
         log.debug(hexDumpEncoder.encode(keyBytes));
@@ -124,6 +132,14 @@ public class CipherUtil {
             stringBuilder.append(line + "\n");
         }
         String base64String = stringBuilder.toString();
+        log.debug(base64String);
+        byte[] keyBytes = Base64.getMimeDecoder().decode(base64String);
+        return loadPrivateKey(keyBytes, algorithm);
+    }
+
+    public static PrivateKey loadPrivateKeyFromPemString(String pemString, String algorithm)
+        throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        String base64String = pemString.replaceAll("\\-\\-\\-\\-\\-[A-Z ]+\\-\\-\\-\\-\\-", "");
         log.debug(base64String);
         byte[] keyBytes = Base64.getMimeDecoder().decode(base64String);
         return loadPrivateKey(keyBytes, algorithm);

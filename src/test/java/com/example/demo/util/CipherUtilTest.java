@@ -130,4 +130,17 @@ class CipherUtilTest {
         fileOutputStream.close();
     }
 
+    @Test
+    public void testloadPrivateKeyFromPemString() throws Exception {
+        FileInputStream inputStream = new FileInputStream("key.pk8.pem");
+        byte[] buffer = new byte[inputStream.available()];
+        inputStream.read(buffer);
+        inputStream.close();
+
+        String text = new String(buffer);
+        log.debug(text);
+
+        PrivateKey privateKey = CipherUtil.loadPrivateKeyFromPemString(text, "RSA");
+    }
+
 }
