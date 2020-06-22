@@ -3,7 +3,7 @@ package com.example.demo;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 class DemoApplicationTests {
 

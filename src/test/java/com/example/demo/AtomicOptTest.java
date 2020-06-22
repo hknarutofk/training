@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import sun.misc.Unsafe;
 

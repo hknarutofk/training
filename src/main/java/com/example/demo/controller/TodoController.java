@@ -11,6 +11,8 @@ import com.baomidou.mybatisplus.extension.api.R;
 import com.example.demo.entity.Todo;
 import com.example.demo.service.TodoService;
 
+import io.swagger.annotations.Api;
+
 /**
  * <p>
  * 代办项目 前端控制器
@@ -19,6 +21,7 @@ import com.example.demo.service.TodoService;
  * @author yeqiang
  * @since 2020-05-22
  */
+@Api("代办API")
 @RestController
 public class TodoController extends ApiController {
     @Autowired

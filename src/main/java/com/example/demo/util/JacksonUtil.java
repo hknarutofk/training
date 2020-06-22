@@ -1,5 +1,6 @@
 package com.example.demo.util;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -35,7 +36,7 @@ public class JacksonUtil {
         om.registerModule(javaTimeModule);
     }
 
-    public static Object parse(String jsonString, Class clazz) throws JsonProcessingException {
+    public static Object parse(String jsonString, Class clazz) throws IOException {
         return om.readValue(jsonString, clazz);
     }
 

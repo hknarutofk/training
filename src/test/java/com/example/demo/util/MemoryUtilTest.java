@@ -1,6 +1,6 @@
 package com.example.demo.util;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import lombok.extern.slf4j.Slf4j;
 import sun.misc.HexDumpEncoder;

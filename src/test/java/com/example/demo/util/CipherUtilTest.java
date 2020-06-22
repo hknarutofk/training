@@ -6,7 +6,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import lombok.extern.slf4j.Slf4j;
 import sun.misc.BASE64Decoder;
