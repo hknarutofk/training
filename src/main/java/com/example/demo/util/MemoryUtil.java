@@ -7,7 +7,7 @@ import java.nio.ByteOrder;
  * @author yeqiang
  * @since 6/18/20 4:28 PM
  */
-public class ByteBufferUtil {
+public class MemoryUtil {
     public static byte[] int2ByteArray(int i) {
         ByteBuffer byteBuffer = ByteBuffer.allocate(Integer.SIZE / 8);
         // C/C++内存中整形都是小端存储，ByteBuffer默认大端存储，认为指定
@@ -34,6 +34,19 @@ public class ByteBufferUtil {
         ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         return byteBuffer.getLong(0);
+    }
+
+    public static String byteArray2HexString(byte[] buffer) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < buffer.length; i++) {
+            // 处理符号位
+            int v = buffer[i] & 0xFF;
+            if (v <= 0x0F) {
+                stringBuilder.append("0");
+            }
+            stringBuilder.append(Integer.toHexString(v));
+        }
+        return stringBuilder.toString();
     }
 
 }
