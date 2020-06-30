@@ -134,6 +134,12 @@ public class CipherUtilTest {
         FileOutputStream fileOutputStream = new FileOutputStream("/tmp/java_sign.bin");
         fileOutputStream.write(signature);
         fileOutputStream.close();
+
+        // 不采用内部摘要方案，做到与C接口相似
+        byte[] md5Buffer = CipherUtil.md5(data);
+        log.debug(CipherUtil.hexDumpEncoder.encode(md5Buffer));
+        signature = CipherUtil.signNONEwithRSA(privateKey, md5Buffer);
+        log.debug(CipherUtil.hexDumpEncoder.encode(signature));
     }
 
     @Test

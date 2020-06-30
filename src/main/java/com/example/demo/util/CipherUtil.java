@@ -103,7 +103,6 @@ public class CipherUtil {
 
     public static PrivateKey loadPrivateKey(byte[] keyBytes, String algorithm)
         throws NoSuchAlgorithmException, InvalidKeySpecException {
-        log.debug(hexDumpEncoder.encode(keyBytes));
         PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(keyBytes);
         KeyFactory keyFactory = KeyFactory.getInstance(algorithm);
         PrivateKey privateKey = keyFactory.generatePrivate(pkcs8EncodedKeySpec);
@@ -132,7 +131,6 @@ public class CipherUtil {
             stringBuilder.append(line + "\n");
         }
         String base64String = stringBuilder.toString();
-        log.debug(base64String);
         byte[] keyBytes = Base64.getMimeDecoder().decode(base64String);
         return loadPrivateKey(keyBytes, algorithm);
     }
@@ -140,7 +138,6 @@ public class CipherUtil {
     public static PrivateKey loadPrivateKeyFromPemString(String pemString, String algorithm)
         throws NoSuchAlgorithmException, InvalidKeySpecException {
         String base64String = pemString.replaceAll("\\-\\-\\-\\-\\-[A-Z ]+\\-\\-\\-\\-\\-", "");
-        log.debug(base64String);
         byte[] keyBytes = Base64.getMimeDecoder().decode(base64String);
         return loadPrivateKey(keyBytes, algorithm);
     }
@@ -161,6 +158,29 @@ public class CipherUtil {
         signature.update(data);
         byte[] result = signature.sign();
         return result;
+    }
+
+    /**
+     * 内部不做摘要算法，由上层自行处理
+     * 
+     * @param privateKey
+     * @param data
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     * @throws SignatureException
+     */
+    public static byte[] signNONEwithRSA(PrivateKey privateKey, byte[] data)
+        throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        Signature signature = Signature.getInstance("NONEwithRSA");
+        signature.initSign(privateKey);
+        signature.update(data);
+        byte[] result = signature.sign();
+        return result;
+    }
+
+    public static byte[] md5(byte[] in) throws NoSuchAlgorithmException {
+        return MessageDigest.getInstance("md5").digest(in);
     }
 
     public static void main(String[] args) throws Exception {
