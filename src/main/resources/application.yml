@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost/plain_a
+    url: jdbc:mysql://10.51.72.167:3306/plain_a
     username: root
     password: abcDEF123___
     driver-class-name: com.mysql.jdbc.Driver
