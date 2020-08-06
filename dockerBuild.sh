@@ -4,4 +4,4 @@ mkdir target/dependency
   cd target/dependency
   jar -xf ../*.jar
 )
-docker build -t core.harbor.hknaruto.com/yeqiang/training .
+docker build -t harbor.hknaruto.com/yeqiang/training .

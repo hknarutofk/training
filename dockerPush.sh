@@ -1,3 +1,4 @@
 #！/bin/bash
 
-docker push core.harbor.hknaruto.com/yeqiang/training:latest
+# docker login harbor.hknaruto.com
+docker push harbor.hknaruto.com/yeqiang/training:latest
