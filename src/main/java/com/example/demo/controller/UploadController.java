@@ -18,6 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 public class UploadController {
     @PostMapping("upload")
     public void upload(@RequestParam("file") MultipartFile file) throws Exception {
-        file.transferTo(new File("/tmp/a.bin"));
+        file.transferTo(new File("/tmp/b.bin"));
     }
 }
