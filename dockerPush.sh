@@ -1,4 +1,5 @@
 #！/bin/bash
+repository="harbor.hknaruto.com/yeqiang/training"
 
-# docker login harbor.hknaruto.com
-docker push harbor.hknaruto.com/yeqiang/training:latest
+docker login harbor.hknaruto.com
+docker push "$repository":"$(git branch | awk '{print $2}')"."$(git rev-parse --short HEAD)"

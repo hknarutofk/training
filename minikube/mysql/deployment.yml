@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-dev-mysql
+  labels:
+    app: k8s-dev-mysql
+spec:
+  selector:
+    matchLabels:
+      app: k8s-dev-mysql
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: k8s-dev-mysql
+    spec:
+      volumes:
+        - name: mysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: dev-volume-claim-mysql
+      containers:
+        - image: r6w9c7qa.mirror.aliyuncs.com/library/mysql:8
+          name: k8s-dev-mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: root
+            - name: MYSQL_PASSWORD
+              value: test
+            - name: MYSQL_USER
+              value: test
+          ports:
+            - containerPort: 3306
+              name: mysql
+          volumeMounts:
+            - name: mysql-persistent-storage
+              mountPath: /var/lib/mysql

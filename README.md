@@ -19,7 +19,11 @@ volatile 分析
 
 # 运维手册
 
+操作系统 Fedora 31
+
 ## minikube
+
+假定minikube是生产环境k8s集群，其中部署了mysql生产环境
 
 ### 安装
 
@@ -115,7 +119,19 @@ Opening in existing browser session.
 
 ```
 
-# 
+
+
+## 使用 kubeadm 创建一个单主集群
+
+安装kubeadmin及相关软件
+
+```
+[yeqiang@localhost ~]$ sudo dnf install kubernetes-kubeadm kubernetes-node kubernetes-client -y
+```
+
+
+
+
 
 ## harbor(k8s)
 
@@ -196,15 +212,68 @@ harbor-harbor-ingress-notary   <none>   notary-harbor.hknaruto.com   172.17.0.2 
 
 创建harbor工程：yeqiang，并将用户yeqiang设置为该工程Master
 
+### 故障排除
 
+重启宿主服务器后，harbor偶尔有服务出现故障，解决方法：
+
+```
+cd minikube/harbor/
+helm upgrade -n harbor harbor .
+```
+
+多来几次，基本上就可以了。
 
 ## MySQL(k8s)
 
-### k8s pet说明
+### k8s pet说明?
 
 ### 安装
 
+```
+[yeqiang@localhost training]$ cd minikube/ && sh install_mysql.sh
++ cd mysql/
++ kubectl apply -f persistentVolume.yml
+persistentvolume/mysql configured
+persistentvolumeclaim/dev-volume-claim-mysql unchanged
++ kubectl apply -f deployment.yml
+deployment.apps/k8s-dev-mysql configured
+```
+
+### 查看服务IP、端口
+
+```
+[yeqiang@localhost mysql]$ minikube  ip
+172.17.0.2
+```
+
+```
+[yeqiang@localhost minikube]$ kubectl get service | grep mysql
+mysql        NodePort    10.111.28.196   <none>        3306:32048/TCP   6m25s
+```
+
+
+
 ### 初始化
+
+1。 启动minikube tunnel
+
+```
+[yeqiang@localhost mysql]$ minikube tunnel
+[sudo] password for yeqiang: 
+Status:	
+	machine: minikube
+	pid: 273957
+	route: 10.96.0.0/12 -> 172.17.0.2
+	minikube: Running
+	services: []
+    errors: 
+		minikube: no errors
+		router: no errors
+		loadbalancer emulator: no errors
+
+```
+
+2。 倒入初始化脚本
 
 
 
