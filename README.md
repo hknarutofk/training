@@ -28,7 +28,7 @@ volatile 分析
 ### 安装
 
 ```
-[yeqiang@localhost training]$ sh -x minikube/install_minicube.sh 
+[yeqiang@localhost training]$ sh -x k8s/install_minicube.sh 
 + set -x -e
 + curl -LO https://storage.googleapis.com/minikube/releases/v1.12.1/minikube-linux-amd64
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
@@ -48,7 +48,7 @@ Complete!
 ### 启动
 
 ```
-[yeqiang@localhost training]$ sh minikube/start_minicube.sh 
+[yeqiang@localhost training]$ sh k8s/start_minicube.sh 
 + minikube start --driver=docker --image-mirror-country=cn --registry-mirror=https://r6w9c7qa.mirror.aliyuncs.com --image-repository=registry.cn-hangzhou.aliyuncs.com/google_containers --iso-url=https://kubernetes.oss-cn-hangzhou.aliyuncs.com/minikube/iso/minikube-v1.12.2.iso --base-image=registry.cn-hangzhou.aliyuncs.com/google_containers/kicbase:v0.0.10
 😄  minikube v1.12.1 on Fedora 31
 ✨  Using the docker driver based on user configuration
@@ -81,7 +81,7 @@ Complete!
 ### 查看minikube
 
 ```
-[yeqiang@localhost minikube]$ kubectl get pods -n kube-system
+[yeqiang@localhost k8s]$ kubectl get pods -n kube-system
 NAME                                        READY   STATUS      RESTARTS   AGE
 coredns-546565776c-p5gr9                    1/1     Running     0          35m
 etcd-minikube                               1/1     Running     0          35m
@@ -97,19 +97,19 @@ storage-provisioner                         1/1     Running     0          35m
 ```
 
 ```
-[yeqiang@localhost minikube]$ kubectl get pods -n kubernetes-dashboard
+[yeqiang@localhost k8s]$ kubectl get pods -n kubernetes-dashboard
 NAME                                        READY   STATUS    RESTARTS   AGE
 dashboard-metrics-scraper-dc6947fbf-qf6nl   1/1     Running   0          18m
 kubernetes-dashboard-6dbb54fd95-v88sk       1/1     Running   0          18m
 
 ```
 
-## kubenetes dashborad
+### kubenetes dashborad
 
 ### 启动
 
 ```
-yeqiang@localhost minikube]$ minikube dashboard
+yeqiang@localhost k8s]$ minikube dashboard
 🤔  Verifying dashboard health ...
 🚀  Launching proxy ...
 🤔  Verifying proxy health ...
@@ -121,15 +121,13 @@ Opening in existing browser session.
 
 
 
-## 使用 kubeadm 创建一个单主集群
-
-安装kubeadmin及相关软件
+## kubernetes单节点
 
 ```
-[yeqiang@localhost ~]$ sudo dnf install kubernetes-kubeadm kubernetes-node kubernetes-client -y
+[yeqiang@localhost training]$ cd k8s/ && sudo sh -x install_kubernetes.sh
 ```
 
-
+注意关闭防火墙
 
 
 
@@ -138,7 +136,7 @@ Opening in existing browser session.
 ### 安装
 
 ```
-[yeqiang@localhost training]$ cd minikube/ && sh -x install_harbor.sh
+[yeqiang@localhost training]$ cd k8s/ && sh -x install_harbor.sh
 + set -x -e
 + kubectl create namespace harbor
 namespace/harbor created
@@ -163,7 +161,7 @@ For more details, please visit https://github.com/goharbor/harbor
 ### 检查
 
 ```
-[yeqiang@localhost minikube]$ kubectl get pods -n harbor
+[yeqiang@localhost k8s]$ kubectl get pods -n harbor
 NAME                                           READY   STATUS    RESTARTS   AGE
 harbor-harbor-chartmuseum-59b8655f45-k7pfx     1/1     Running   0          33m
 harbor-harbor-clair-7d796cbd8b-j5dgd           2/2     Running   6          33m
@@ -186,7 +184,7 @@ harbor-harbor-trivy-0                          1/1     Running   0          33m
 获取ingress服务ip
 
 ```
-[yeqiang@localhost minikube]$ kubectl get ingress -n harbor 
+[yeqiang@localhost k8s]$ kubectl get ingress -n harbor 
 NAME                           CLASS    HOSTS                        ADDRESS      PORTS     AGE
 harbor-harbor-ingress          <none>   harbor.hknaruto.com          172.17.0.2   80, 443   38m
 harbor-harbor-ingress-notary   <none>   notary-harbor.hknaruto.com   172.17.0.2   80, 443   38m
@@ -217,7 +215,7 @@ harbor-harbor-ingress-notary   <none>   notary-harbor.hknaruto.com   172.17.0.2 
 重启宿主服务器后，harbor偶尔有服务出现故障，解决方法：
 
 ```
-cd minikube/harbor/
+cd k8s/harbor/
 helm upgrade -n harbor harbor .
 ```
 
@@ -230,7 +228,7 @@ helm upgrade -n harbor harbor .
 ### 安装
 
 ```
-[yeqiang@localhost training]$ cd minikube/ && sh install_mysql.sh
+[yeqiang@localhost training]$ cd k8s/ && sh install_mysql.sh
 + cd mysql/
 + kubectl apply -f persistentVolume.yml
 persistentvolume/mysql configured
@@ -247,7 +245,7 @@ deployment.apps/k8s-dev-mysql configured
 ```
 
 ```
-[yeqiang@localhost minikube]$ kubectl get service | grep mysql
+[yeqiang@localhost k8s]$ kubectl get service | grep mysql
 mysql        NodePort    10.111.28.196   <none>        3306:32048/TCP   6m25s
 ```
 
