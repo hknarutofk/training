@@ -1,0 +1,134 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: harbor-harbor-trivy
+  namespace: harbor  
+  labels:
+    app: harbor
+    app.kubernetes.io/managed-by: Helm
+    chart: harbor
+    component: trivy
+    heritage: Helm
+    release: harbor
+  annotations:
+    meta.helm.sh/release-name: harbor
+    meta.helm.sh/release-namespace: harbor 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: harbor
+      component: trivy
+      release: harbor
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: harbor
+        chart: harbor
+        component: trivy
+        heritage: Helm
+        release: harbor
+      annotations:
+        checksum/secret: 88b6aa7284c9b4b2849576016a2ba5ea685a328967fe067cd240cebb85a54ad9
+    spec:
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: release-harbor-trivy
+      containers:
+        - name: trivy
+          image: 'r6w9c7qa.mirror.aliyuncs.com/goharbor/trivy-adapter-photon:v2.0.0'
+          ports:
+            - name: api-server
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: SCANNER_LOG_LEVEL
+              value: info
+            - name: SCANNER_TRIVY_CACHE_DIR
+              value: /home/scanner/.cache/trivy
+            - name: SCANNER_TRIVY_REPORTS_DIR
+              value: /home/scanner/.cache/reports
+            - name: SCANNER_TRIVY_DEBUG_MODE
+              value: 'false'
+            - name: SCANNER_TRIVY_VULN_TYPE
+              value: 'os,library'
+            - name: SCANNER_TRIVY_GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: harbor-harbor-trivy
+                  key: gitHubToken
+            - name: SCANNER_TRIVY_SEVERITY
+              value: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
+            - name: SCANNER_TRIVY_IGNORE_UNFIXED
+              value: 'false'
+            - name: SCANNER_TRIVY_SKIP_UPDATE
+              value: 'false'
+            - name: SCANNER_TRIVY_INSECURE
+              value: 'false'
+            - name: SCANNER_API_SERVER_ADDR
+              value: ':8080'
+            - name: SCANNER_STORE_REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: harbor-harbor-trivy
+                  key: redisURL
+            - name: SCANNER_JOB_QUEUE_REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: harbor-harbor-trivy
+                  key: redisURL
+          resources:
+            limits:
+              cpu: '1'
+              memory: 1Gi
+            requests:
+              cpu: 200m
+              memory: 512Mi
+          volumeMounts:
+            - name: data
+              mountPath: /home/scanner/.cache
+          livenessProbe:
+            httpGet:
+              path: /probe/healthy
+              port: api-server
+              scheme: HTTP
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 10
+          readinessProbe:
+            httpGet:
+              path: /probe/ready
+              port: api-server
+              scheme: HTTP
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      automountServiceAccountToken: false
+      securityContext:
+        runAsUser: 10000
+        runAsNonRoot: true
+        fsGroup: 10000
+      schedulerName: default-scheduler  
+  serviceName: harbor-harbor-trivy
+  podManagementPolicy: OrderedReady
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 0
+  revisionHistoryLimit: 10
+

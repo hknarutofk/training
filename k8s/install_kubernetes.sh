@@ -9,3 +9,7 @@ chmod +x ./easzup
 ./easzup -P
 ./easzup -S
 docker exec -it kubeasz easzctl start-aio
+# 初始化本地存储
+sudo mkdir /k8s-persistent-volume/common -p
+kubectl apply -f storageClass.yml
+kubectl apply -f persistentVolume.yml

@@ -127,11 +127,388 @@ Opening in existing browser session.
 [yeqiang@localhost training]$ cd k8s/ && sudo sh -x install_kubernetes.sh
 ```
 
-注意关闭防火墙
+#### nginx-ingress-controller
+
+编辑/etc/ansible/manifests/ingress/nginx-ingress/nginx-ingress-hostport.yaml 
+
+采用hostNetwork模式，在宿主机器上开80 443端口
+
+```
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ingress-nginx
+
+---
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: nginx-configuration
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: tcp-services
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: udp-services
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nginx-ingress-serviceaccount
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: nginx-ingress-clusterrole
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - endpoints
+      - nodes
+      - pods
+      - secrets
+    verbs:
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+    verbs:
+      - get
+  - apiGroups:
+      - ""
+    resources:
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - "extensions"
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+  - apiGroups:
+      - "extensions"
+    resources:
+      - ingresses/status
+    verbs:
+      - update
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: nginx-ingress-role
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - pods
+      - secrets
+      - namespaces
+    verbs:
+      - get
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    resourceNames:
+      # Defaults to "<election-id>-<ingress-class>"
+      # Here: "<ingress-controller-leader>-<nginx>"
+      # This has to be adapted if you change either parameter
+      # when launching the nginx-ingress-controller.
+      - "ingress-controller-leader-nginx"
+    verbs:
+      - get
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - create
+  - apiGroups:
+      - ""
+    resources:
+      - endpoints
+    verbs:
+      - get
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: nginx-ingress-role-nisa-binding
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: nginx-ingress-role
+subjects:
+  - kind: ServiceAccount
+    name: nginx-ingress-serviceaccount
+    namespace: ingress-nginx
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: nginx-ingress-clusterrole-nisa-binding
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: nginx-ingress-clusterrole
+subjects:
+  - kind: ServiceAccount
+    name: nginx-ingress-serviceaccount
+    namespace: ingress-nginx
+
+---
+
+apiVersion: apps/v1 
+kind: DaemonSet
+metadata:
+  name: nginx-ingress-controller
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ingress-nginx
+      app.kubernetes.io/part-of: ingress-nginx
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ingress-nginx
+        app.kubernetes.io/part-of: ingress-nginx
+      annotations:
+        prometheus.io/port: "10254"
+        prometheus.io/scrape: "true"
+    spec:
+      serviceAccountName: nginx-ingress-serviceaccount
+      hostNetwork: true
+      dnsPolicy: "ClusterFirstWithHostNet"
+      containers:
+        - name: nginx-ingress-controller
+          #image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.21.0
+          #使用以下镜像，方便国内下载加速
+          image: jmgao1983/nginx-ingress-controller:0.21.0
+          args:
+            - /nginx-ingress-controller
+            - --configmap=$(POD_NAMESPACE)/nginx-configuration
+            - --tcp-services-configmap=$(POD_NAMESPACE)/tcp-services
+            - --udp-services-configmap=$(POD_NAMESPACE)/udp-services
+            - --publish-service=$(POD_NAMESPACE)/ingress-nginx
+            - --annotations-prefix=nginx.ingress.kubernetes.io
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - NET_BIND_SERVICE
+            # www-data -> 33
+            runAsUser: 33
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - name: http
+              containerPort: 80
+            - name: https
+              containerPort: 443
+            # hostPort可以直接使用node节点的网络端口暴露服务
+            #- name: mysql
+            #  containerPort: 3306
+            #  hostPort: 3306
+            #- name: dns
+            #  containerPort: 53
+            #  hostPort: 53
+            #  protocol: UDP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 10254
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 10254
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-nginx
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+spec:
+  type: ClusterIP 
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      protocol: TCP
+    - name: https
+      port: 443
+      targetPort: 443
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+
+---
+
+```
+
+部署ingress
+
+```
+[yeqiang@harbor ~]$ kubectl apply -f /etc/ansible/manifests/ingress/nginx-ingress/nginx-ingress-hostport.yaml
+namespace/ingress-nginx unchanged
+configmap/nginx-configuration unchanged
+configmap/tcp-services unchanged
+configmap/udp-services unchanged
+serviceaccount/nginx-ingress-serviceaccount unchanged
+clusterrole.rbac.authorization.k8s.io/nginx-ingress-clusterrole unchanged
+role.rbac.authorization.k8s.io/nginx-ingress-role unchanged
+rolebinding.rbac.authorization.k8s.io/nginx-ingress-role-nisa-binding unchanged
+clusterrolebinding.rbac.authorization.k8s.io/nginx-ingress-clusterrole-nisa-binding unchanged
+daemonset.apps/nginx-ingress-controller unchanged
+service/ingress-nginx created
+
+```
+
+#### default-http-backend
+
+```
+[yeqiang@harbor k8s]$ kubectl apply -f default-http-backend.yml 
+deployment.apps/default-http-backend created
+service/default-http-backend created
+
+```
 
 
 
-## harbor(k8s)
+#### 故障排除
+
+kubernetes-dashboard 故障，启动失败
+
+```
+panic: Get https://10.68.0.1:443/api/v1/namespaces/kube-system/secrets/kubernetes-dashboard-csrf: dial tcp 10.68.0.1:443: connect: no route to host
+```
+
+   排除方法：依次操作启动、停止firewalld
+
+```
+[yeqiang@localhost ~]$ sudo systemctl start firewalld
+[yeqiang@localhost ~]$ sudo systemctl stop firewalld
+```
+
+​	或者
+
+```
+[yeqiang@harbor ~]$ sudo iptables -F
+```
+
+ingress没有Endpoints
+
+```
+[yeqiang@harbor k8s]$ kubectl get pods -n ingress-nginx
+NAME                                       READY   STATUS    RESTARTS   AGE
+nginx-ingress-controller-8b77bccc5-jt7p5   1/1     Running   2          72m
+
+[yeqiang@harbor k8s]$ kubectl logs -n ingress-nginx  nginx-ingress-controller-8b77bccc5-jt7p5
+-------------------------------------------------------------------------------
+NGINX Ingress controller
+  Release:    0.21.0
+  Build:      git-b65b85cd9
+  Repository: https://github.com/aledbf/ingress-nginx
+-------------------------------------------------------------------------------
+
+nginx version: nginx/1.15.6
+....
+W0821 07:32:01.973773       7 controller.go:1071] Error getting SSL certificate "default/hknaruto.com": local SSL certificate default/hknaruto.com was not found. Using default certificate
+
+```
+
+直接采用hostNetwork部署，后期前端应当采用keepalived+nginx作上层高可用代理，提供http、https，k8s集群ingress只需要提供http服务即可。
+
+
+
+## harbor(minikube、kubernetes)
 
 ### 安装
 
@@ -204,24 +581,35 @@ harbor-harbor-ingress-notary   <none>   notary-harbor.hknaruto.com   172.17.0.2 
 
 登陆密码：Harbor12345
 
-### 配置harbor
-
-创建用户：yeqiang
-
-创建harbor工程：yeqiang，并将用户yeqiang设置为该工程Master
-
-### 故障排除
-
-重启宿主服务器后，harbor偶尔有服务出现故障，解决方法：
+### docker信任自签名证书
 
 ```
-cd k8s/harbor/
-helm upgrade -n harbor harbor .
+[root@harbor system]# sudo vim /etc/docker/daemon.json 
 ```
 
-多来几次，基本上就可以了。
+```
+{
+  "insecure-registries": ["harbor.hknaruto.com"],
+  "registry-mirrors": [
+    "https://docker.mirrors.ustc.edu.cn",
+    "http://hub-mirror.c.163.com"
+  ],
+  "max-concurrent-downloads": 10,
+  "log-driver": "json-file",
+  "log-level": "warn",
+  "log-opts": {
+    "max-size": "10m",
+    "max-file": "3"
+    },
+  "data-root": "/var/lib/docker"
+}
+```
 
-## MySQL(k8s)
+增加"insecure-registries": ["harbor.hknaruto.com"],
+
+重启docker服务。
+
+## MySQL(minikube)未完成
 
 ### k8s pet说明?
 
@@ -275,15 +663,114 @@ Status:
 
 
 
-## 部署training(k8s)
+## 部署training(kubernetes)
 
-。。。
+```
+[yeqiang@harbor training]$ sh k8sDeploy.sh 
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] Using the MultiThreadedBuilder implementation with a thread count of 4
+[INFO] 
+[INFO] --------------------------< com.example:demo >--------------------------
+[INFO] Building demo 0.0.1-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.1.0:clean (default-clean) @ demo ---
+[INFO] Deleting /home/yeqiang/code/training/target
+[INFO] 
+[INFO] --- maven-resources-plugin:3.1.0:resources (default-resources) @ demo ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 1 resource
+[INFO] Copying 2 resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.8.1:compile (default-compile) @ demo ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 16 source files to /home/yeqiang/code/training/target/classes
+[WARNING] /home/yeqiang/code/training/src/main/java/com/example/demo/util/CipherUtil.java:[12,16] sun.misc.HexDumpEncoder is internal proprietary API and may be removed in a future release
+[WARNING] /home/yeqiang/code/training/src/main/java/com/example/demo/util/CipherUtil.java:[12,16] sun.misc.HexDumpEncoder is internal proprietary API and may be removed in a future release
+[WARNING] /home/yeqiang/code/training/src/main/java/com/example/demo/util/CipherUtil.java:[12,16] sun.misc.HexDumpEncoder is internal proprietary API and may be removed in a future release
+[WARNING] /home/yeqiang/code/training/src/main/java/com/example/demo/util/CipherUtil.java:[12,16] sun.misc.HexDumpEncoder is internal proprietary API and may be removed in a future release
+[WARNING] /home/yeqiang/code/training/src/main/java/com/example/demo/util/CipherUtil.java:[12,16] sun.misc.HexDumpEncoder is internal proprietary API and may be removed in a future release
+[WARNING] /home/yeqiang/code/training/src/main/java/com/example/demo/util/CipherUtil.java:[21,25] sun.misc.HexDumpEncoder is internal proprietary API and may be removed in a future release
+[WARNING] /home/yeqiang/code/training/src/main/java/com/example/demo/util/CipherUtil.java:[21,61] sun.misc.HexDumpEncoder is internal proprietary API and may be removed in a future release
+[INFO] /home/yeqiang/code/training/src/main/java/com/example/demo/util/JacksonUtil.java: /home/yeqiang/code/training/src/main/java/com/example/demo/util/JacksonUtil.java uses unchecked or unsafe operations.
+[INFO] /home/yeqiang/code/training/src/main/java/com/example/demo/util/JacksonUtil.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- maven-resources-plugin:3.1.0:testResources (default-testResources) @ demo ---
+[INFO] Not copying test resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.8.1:testCompile (default-testCompile) @ demo ---
+[INFO] Not compiling test sources
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.22.2:test (default-test) @ demo ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- maven-jar-plugin:3.1.2:jar (default-jar) @ demo ---
+[INFO] Building jar: /home/yeqiang/code/training/target/demo-0.0.1-SNAPSHOT.jar
+[INFO] 
+[INFO] --- spring-boot-maven-plugin:2.2.7.RELEASE:repackage (repackage) @ demo ---
+[INFO] Replacing main artifact with repackaged archive
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  1.814 s (Wall Clock)
+[INFO] Finished at: 2020-08-25T15:37:10+08:00
+[INFO] ------------------------------------------------------------------------
+Sending build context to Docker daemon  37.63MB
+Step 1/6 : FROM openjdk:8-jdk-alpine
+ ---> a3562aa0b991
+Step 2/6 : VOLUME /tmp
+ ---> Using cache
+ ---> 66832f61c860
+Step 3/6 : COPY BOOT-INF/lib /app/lib
+ ---> Using cache
+ ---> 5ec17ceeadab
+Step 4/6 : COPY META-INF /app/META-INF
+ ---> Using cache
+ ---> ef3fda3d4b71
+Step 5/6 : COPY BOOT-INF/classes /app
+ ---> Using cache
+ ---> e0a290b9e2a1
+Step 6/6 : ENTRYPOINT tini -- java -XX:MaxRAMFraction=2 -cp app:app/lib/* com.example.demo.DemoApplication
+ ---> Using cache
+ ---> d31217544e4e
+Successfully built d31217544e4e
+Successfully tagged harbor.hknaruto.com/library/training:master.a216172
+Username: admin
+Password: 
+WARNING! Your password will be stored unencrypted in /home/yeqiang/.docker/config.json.
+Configure a credential helper to remove this warning. See
+https://docs.docker.com/engine/reference/commandline/login/#credentials-store
 
+Login Succeeded
+The push refers to repository [harbor.hknaruto.com/library/training]
+3efd11b6f5f7: Pushed 
+d9e6d176174f: Pushed 
+73cad1bf8429: Pushed 
+ceaf9e1ebef5: Pushed 
+9b9b7f3d56a0: Pushed 
+f1b5933fe4b5: Pushed 
+master.a216172: digest: sha256:b40852cf2d1431e51e22a17d304786be4a8dd99312634eb8e98a428482a02fe2 size: 1576
+service/training unchanged
+deployment.apps/training configured
+ingress.extensions/training-ingress unchanged
 
+```
 
+### 增加hosts配置
 
+```
+[yeqiang@harbor training]$ sudo su
+[root@harbor training]# echo "10.51.72.167 training.hknaruto.com" >> /etc/hosts
 
+```
 
+### 访问ingress暴露的服务
+
+```
+[yeqiang@harbor training]$ curl -k https://training.hknaruto.com/ip
+10.51.72.167-10.51.72.167-null
+```
 
 
 

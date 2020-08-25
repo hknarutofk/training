@@ -1,4 +1,4 @@
-repository="harbor.hknaruto.com/yeqiang/training"
+repository="harbor.hknaruto.com/library/training"
 
 mvn clean package -Dmaven.test.skip=true -T4
 mkdir target/dependency

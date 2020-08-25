@@ -1,5 +1,5 @@
 #!/bin/bash
-repository="harbor.hknaruto.com/yeqiang/training"
+repository="harbor.hknaruto.com/library/training"
 
 sh dockerBuild.sh
 sh dockerPush.sh
