@@ -25,11 +25,11 @@ spec:
               value: '-XX:MaxRAMFraction=2'
           resources:
             limits:
-              cpu: 2
-              memory: 1G
+              cpu: 1
+              memory: 2G
             requests:
               cpu: 200m
-              memory: 1G
+              memory: 2G
           livenessProbe:
             httpGet:
               path: /actuator/health

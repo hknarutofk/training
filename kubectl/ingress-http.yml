@@ -1,0 +1,23 @@
+kind: Ingress
+apiVersion: extensions/v1beta1
+metadata:
+  name: training-ingress-http
+  namespace: default
+  labels:
+    app: training
+  annotations:
+    ingress.kubernetes.io/proxy-body-size: '0'
+    ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/proxy-body-size: '0'
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+
+spec:
+  rules:
+    - host: training.hknaruto.com
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              serviceName: training
+              servicePort: 8080
