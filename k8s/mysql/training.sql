@@ -1,9 +1,9 @@
-CREATE DATABASE `training`;
+create DATABASE `training`;
 use `training`;
 
 
-DROP TABLE IF EXISTS `todo`;
-CREATE TABLE `todo` (
+drop table IF EXISTS `todo`;
+create TABLE `todo` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `content` varchar(10240) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `status` int(10) unsigned NOT NULL DEFAULT '0',

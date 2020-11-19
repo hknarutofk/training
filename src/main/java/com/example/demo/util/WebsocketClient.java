@@ -3,9 +3,9 @@ package com.example.demo.util;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.java_websocket.WebSocket;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
+import org.java_websocket.enums.ReadyState;
 import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,8 +50,8 @@ public class WebsocketClient {
 
         client.connect();
         // logger.info(client.getDraft());
-        while (!client.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
-            if (client.getReadyState() == WebSocket.READYSTATE.CLOSED) {
+        while (!client.getReadyState().equals(ReadyState.OPEN)) {
+            if (client.getReadyState() == ReadyState.CLOSED) {
                 break;
             }
             logger.info("正在连接...");

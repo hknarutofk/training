@@ -16,3 +16,17 @@ spring:
     local-date-time-format: yyyy-MM-dd HH:mm:ss
     local-date-format: yyyy-MM-dd
     local-time-format: HH:mm:ss
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            clientId: 0eea41129e6b55a01323
+            clientSecret: 6d3a0552460982205cfe9042f03f19331a1232f7
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: info, health, mappings

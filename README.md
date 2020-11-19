@@ -774,3 +774,7 @@ ingress.extensions/training-ingress unchanged
 
 
 
+## OAuth2.0
+
+https://spring.io/guides/tutorials/spring-boot-oauth2/
+
