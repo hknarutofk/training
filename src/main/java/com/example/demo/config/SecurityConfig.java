@@ -30,8 +30,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests(
-            a -> a.antMatchers("/", "/**.html", "/error", "/webjars/**").permitAll().anyRequest().authenticated())
+        http.authorizeRequests(a -> a.antMatchers("/", "/**.html", "/error", "/webjars/**", "/login").permitAll()
+            .anyRequest().authenticated())
             .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
             .oauth2Login().and().logout(l -> l.logoutSuccessUrl("/").permitAll())
             // csrf token 放入cookie

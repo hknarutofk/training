@@ -23,7 +23,20 @@ spring:
           github:
             clientId: 0eea41129e6b55a01323
             clientSecret: 6d3a0552460982205cfe9042f03f19331a1232f7
-
+          mysite:
+            clientId: acme
+            clientSecret: acmesecret
+            clientAuthenticationMethod: basic
+            authorizationGrantType: authorization_code
+            redirectUri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            clientName: acme
+            scope: profile
+        provider:
+          mysite:
+            authorizationUri: http://127.0.0.1:8084/uaa/oauth/authorize
+            tokenUri: http://127.0.0.1:8084/uaa/oauth/token
+            userNameAttribute: name
+            user-info-uri: http://127.0.0.1:8084/uaa/user
 
 management:
   endpoints:
