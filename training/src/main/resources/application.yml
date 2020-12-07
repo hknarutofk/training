@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 10080
 spring:
   servlet:
     multipart:
@@ -12,6 +12,75 @@ spring:
     username: root
     password: abcDEF123___
     driver-class-name: com.mysql.jdbc.Driver
+    # SpringBoot 默认连接池实现是tomcat jdbc
+    druid:
+      # druid 接配置
+      initial-size: 10
+      max-active: 100
+      min-idle: 10
+      # 等待60秒
+      max-wait: 60000
+      pool-prepared-statements: false
+      # max-pool-prepared-statement-per-connection-size: 
+      # max-open-prepared-statements:  #和上面的等价
+      validation-query: select 1
+      validation-query-timeout: 1
+      test-on-borrow: false
+      test-on-return: false
+      test-while-idle: true
+      # 空闲连接回收时间间隔
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 60000
+      max-evictable-idle-time-millis: 120000
+      #配置多个英文逗号分隔
+      filters:  config,stat,wall,log4j2
+      # WebStatFilter配置，说明请参考Druid Wiki，配置_配置WebStatFilter
+      web-stat-filter:
+        #是否启用StatFilter默认值false
+        enabled:  true
+        url-pattern: /*
+        exclusions: js,.gif,.jpg,.png,.css,.ico,/druid/*
+        session-stat-enable: true
+        session-stat-max-count: 1000
+        principal-session-name: admin
+        principal-cookie-name: admin
+        profile-enable: true
+      # StatViewServlet配置，说明请参考Druid Wiki，配置_StatViewServlet配置
+      stat-view-servlet:
+        #是否启用StatViewServlet（监控页面）默认值为false（考虑到安全问题默认并未启动，如需启用建议设置密码或白名单以保障安全）
+        enabled: true
+        url-pattern: /druid/*
+        reset-enable: false
+        login-username: hknaruto
+        login-password: hknarutopwd
+        allow: 127.0.0.1
+        # deny:
+      # Spring监控配置，说明请参考Druid Github Wiki，配置_Druid和Spring关联监控配置
+      # aop-patterns: # Spring监控AOP切入点，如x.y.z.service.*,配置多个英文逗号分隔
+      # 配置StatFilter
+      filter:
+        stat:
+          enabled: true
+          db-type: mysql
+          log-slow-sql: true
+          slow-sql-millis: 2000
+      # 配置WallFilter
+        wall:
+          enabled: true
+          db-type: mysql
+          config.delete-allow: false
+          config.drop-table-allow: false
+#      目前为以下 Filter 提供了配置支持，请参考文档或者根据IDE提示（spring.datasource.druid.filter.*）进行配置。
+#
+#      StatFilter
+#      WallFilter
+#      ConfigFilter
+#      EncodingConvertFilter
+#      Slf4jLogFilter
+#      Log4jFilter
+#      Log4j2Filter
+#      CommonsLogFilter
+#      要想使自定义 Filter 配置生效需要将对应 Filter 的 enabled 设置为 true ，Druid Spring Boot Starter 默认禁用 StatFilter，你也可以将其 enabled 设置为 true 来启用它。
   jackson:
     local-date-time-format: yyyy-MM-dd HH:mm:ss
     local-date-format: yyyy-MM-dd

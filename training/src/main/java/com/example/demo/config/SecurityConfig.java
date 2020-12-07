@@ -12,6 +12,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author yeqiang
@@ -24,17 +27,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public UserDetailsService users() {
         UserDetails user = User.builder().username("user")
-            .password("{bcrypt}$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmNSJZ.0FxO/BTk76klW").roles("USER").build();
+                .password("{bcrypt}$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmNSJZ.0FxO/BTk76klW").roles("USER").build();
         return new InMemoryUserDetailsManager(user);
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests(a -> a.antMatchers("/", "/**.html", "/error", "/webjars/**", "/login").permitAll()
-            .anyRequest().authenticated())
-            .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-            .oauth2Login().and().logout(l -> l.logoutSuccessUrl("/").permitAll())
-            // csrf token 放入cookie
-            .csrf(c -> c.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
+        http.authorizeRequests(
+                a -> a.antMatchers("/", "/**.html", "/error", "/webjars/**", "/login", "/druid/**").permitAll()
+                        .anyRequest().authenticated())
+                .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                .oauth2Login().and().logout(l -> l.logoutSuccessUrl("/").permitAll())
+
+                // csrf token 放入cookie
+                .csrf(c -> c.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+                .csrf(c -> c.requireCsrfProtectionMatcher(new RequestMatcher() {
+                    @Override
+                    public boolean matches(HttpServletRequest request) {
+                        return !request.getServletPath().startsWith("/druid");
+                    }
+                }))
+        ;
     }
 }
