@@ -32,6 +32,7 @@ spring:
       time-between-eviction-runs-millis: 60000
       min-evictable-idle-time-millis: 60000
       max-evictable-idle-time-millis: 120000
+      connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=6000
       #配置多个英文逗号分隔
       filters:  config,stat,wall,log4j2
       # WebStatFilter配置，说明请参考Druid Wiki，配置_配置WebStatFilter

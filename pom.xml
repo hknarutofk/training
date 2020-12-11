@@ -5,9 +5,11 @@
     <artifactId>training</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>demo</name>
+    <packaging>pom</packaging>
     <description>Demo project for Spring Boot</description>
     <modules>
         <module>training</module>
         <module>authserver</module>
+        <module>spring-boot-elasticsearch</module>
     </modules>
 </project>

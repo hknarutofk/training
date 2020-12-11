@@ -1,0 +1,7 @@
+spring:
+  elasticsearch:
+    rest:
+      uris: "http://localhost:9200"
+      read-timeout: "10s"
+    repositories:
+      enabled: true
