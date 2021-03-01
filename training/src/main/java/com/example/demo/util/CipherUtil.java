@@ -1,5 +1,10 @@
 package com.example.demo.util;
 
+import lombok.extern.slf4j.Slf4j;
+import sun.misc.HexDumpEncoder;
+
+import javax.crypto.*;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
@@ -8,11 +13,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
-import lombok.extern.slf4j.Slf4j;
-import sun.misc.HexDumpEncoder;
-
 /**
- * 
  * @author yeqiang
  * @since 6/17/20 2:32 PM
  */
@@ -55,7 +56,7 @@ public class CipherUtil {
     }
 
     public static PublicKey loadPublicKey(byte[] keyBytes, String algorithm)
-        throws NoSuchAlgorithmException, InvalidKeySpecException {
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
         log.debug(hexDumpEncoder.encode(keyBytes));
         X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(keyBytes);
         KeyFactory keyFactory = KeyFactory.getInstance(algorithm);
@@ -64,20 +65,20 @@ public class CipherUtil {
     }
 
     public static PublicKey loadPublicKey(InputStream inputStream, String algorithm)
-        throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+            throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         byte[] keyBytes = new byte[inputStream.available()];
         inputStream.read(keyBytes);
         return loadPublicKey(keyBytes, algorithm);
     }
 
     public static PublicKey loadPublicKey(String filePath, String algorithm)
-        throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+            throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         FileInputStream fileInputStream = new FileInputStream(filePath);
         return loadPublicKey(fileInputStream, algorithm);
     }
 
     public static PublicKey loadPublicKeyFromPem(String filePath, String algorithm)
-        throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+            throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath));
         StringBuilder stringBuilder = new StringBuilder();
         String line;
@@ -94,7 +95,7 @@ public class CipherUtil {
     }
 
     public static PublicKey loadPublicKeyFromPemString(String pemString, String algorithm)
-        throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+            throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         String base64String = pemString.replaceAll("\\-\\-\\-\\-\\-[A-Z ]+\\-\\-\\-\\-\\-", "");
         log.debug(base64String);
         byte[] keyBytes = Base64.getMimeDecoder().decode(base64String);
@@ -102,7 +103,7 @@ public class CipherUtil {
     }
 
     public static PrivateKey loadPrivateKey(byte[] keyBytes, String algorithm)
-        throws NoSuchAlgorithmException, InvalidKeySpecException {
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
         PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(keyBytes);
         KeyFactory keyFactory = KeyFactory.getInstance(algorithm);
         PrivateKey privateKey = keyFactory.generatePrivate(pkcs8EncodedKeySpec);
@@ -111,7 +112,7 @@ public class CipherUtil {
     }
 
     public static PrivateKey loadPrivateKey(String filePath, String algorithm)
-        throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+            throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         FileInputStream fileInputStream = new FileInputStream(filePath);
         byte[] keyBytes = new byte[fileInputStream.available()];
         fileInputStream.read(keyBytes);
@@ -120,7 +121,7 @@ public class CipherUtil {
     }
 
     public static PrivateKey loadPrivateKeyFromPem(String filePath, String algorithm)
-        throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+            throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath));
         StringBuilder stringBuilder = new StringBuilder();
         String line;
@@ -136,14 +137,14 @@ public class CipherUtil {
     }
 
     public static PrivateKey loadPrivateKeyFromPemString(String pemString, String algorithm)
-        throws NoSuchAlgorithmException, InvalidKeySpecException {
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
         String base64String = pemString.replaceAll("\\-\\-\\-\\-\\-[A-Z ]+\\-\\-\\-\\-\\-", "");
         byte[] keyBytes = Base64.getMimeDecoder().decode(base64String);
         return loadPrivateKey(keyBytes, algorithm);
     }
 
     public static boolean verify(PublicKey publicKey, byte[] data, String algorithm, byte[] signData)
-        throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+            throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         Signature signature = Signature.getInstance(algorithm);
         signature.initVerify(publicKey);
         signature.update(data);
@@ -152,7 +153,7 @@ public class CipherUtil {
     }
 
     public static byte[] sign(PrivateKey privateKey, byte[] data, String algorithm)
-        throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+            throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         Signature signature = Signature.getInstance(algorithm);
         signature.initSign(privateKey);
         signature.update(data);
@@ -162,7 +163,7 @@ public class CipherUtil {
 
     /**
      * 内部不做摘要算法，由上层自行处理
-     * 
+     *
      * @param privateKey
      * @param data
      * @return
@@ -171,7 +172,7 @@ public class CipherUtil {
      * @throws SignatureException
      */
     public static byte[] signNONEwithRSA(PrivateKey privateKey, byte[] data)
-        throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+            throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         Signature signature = Signature.getInstance("NONEwithRSA");
         signature.initSign(privateKey);
         signature.update(data);
@@ -181,6 +182,22 @@ public class CipherUtil {
 
     public static byte[] md5(byte[] in) throws NoSuchAlgorithmException {
         return MessageDigest.getInstance("md5").digest(in);
+    }
+
+    public static byte[] AES_256_ecb_encrypt(byte[] input, byte[] byteKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        SecretKey key = new SecretKeySpec(byteKey, "AES");
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+        byte[] encrypted = cipher.doFinal(input);
+        return encrypted;
+    }
+
+    public static byte[] AES_256_ecb_decrypt(byte[] input, byte[] byteKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        SecretKey key = new SecretKeySpec(byteKey, "AES");
+        cipher.init(Cipher.DECRYPT_MODE, key);
+        byte[] decrypted = cipher.doFinal(input);
+        return decrypted;
     }
 
     public static void main(String[] args) throws Exception {

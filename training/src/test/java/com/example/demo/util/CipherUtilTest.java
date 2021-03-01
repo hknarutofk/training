@@ -1,22 +1,20 @@
 package com.example.demo.util;
 
-import java.io.*;
-import java.security.*;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Base64;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.Assert;
+import org.junit.Test;
+import sun.misc.BASE64Decoder;
+import sun.misc.BASE64Encoder;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-
-import org.junit.Assert;
-import org.junit.Test;
-
-import lombok.extern.slf4j.Slf4j;
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
+import java.io.*;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Base64;
 
 /**
  * @author yeqiang
@@ -27,7 +25,7 @@ public class CipherUtilTest {
 
     /**
      * 在工程目录下运行sh bash_script/openssl_rsa.sh 生成key.pk8.der, pubkey.x509.der
-     * 
+     *
      * @throws NoSuchAlgorithmException
      * @throws IOException
      * @throws InvalidKeySpecException
@@ -36,7 +34,7 @@ public class CipherUtilTest {
      */
     @Test
     public void testOpenssl()
-        throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, SignatureException, InvalidKeyException {
+            throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, SignatureException, InvalidKeyException {
         PrivateKey privateKey = CipherUtil.loadPrivateKey("key.pk8.der", "RSA");
         log.debug(CipherUtil.hexDumpEncoder.encode(privateKey.getEncoded()));
         PublicKey publicKey = CipherUtil.loadPublicKey("pubkey.x509.der", "RSA");
@@ -52,7 +50,7 @@ public class CipherUtilTest {
 
     @Test
     public void testPemFormat()
-        throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, SignatureException, InvalidKeyException {
+            throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, SignatureException, InvalidKeyException {
         PrivateKey privateKey = CipherUtil.loadPrivateKeyFromPem("key.pk8.pem", "RSA");
         log.debug(CipherUtil.hexDumpEncoder.encode(privateKey.getEncoded()));
         PublicKey publicKey = CipherUtil.loadPublicKeyFromPem("pubkey.x509.pem", "RSA");
@@ -91,7 +89,7 @@ public class CipherUtilTest {
     public void testBase64() {
         byte[] buffer = new byte[1024];
         for (int i = 0; i < buffer.length; i++) {
-            buffer[i] = (byte)i;
+            buffer[i] = (byte) i;
         }
 
         String base64String1;
@@ -108,7 +106,7 @@ public class CipherUtilTest {
 
     /**
      * 与C交叉签名认证 https://github.com/hknarutofk/openssl-trainning/blob/master/cross_sign_verify_with_java.c
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -163,14 +161,14 @@ public class CipherUtilTest {
     @Test
     public void test2() throws Exception {
         String in =
-            "zC/GfP6rqbcWUkE4nlqgDeFAK4jLy5P2N4ec5i040ADosft3twjt1lKhhhVLKI+eW3JUBGF20J8ZBP5D6LoUw7qjBAApD0K/Q5OEjBxna3n6pAGqe9kNP45JscMiHIW81UElkyF2p1fnhb1MVc8g/9dIYKQJRBtFd+OFcz2+2CbmLbI5C4cBHtU+W7bCmAwGVJg4RF1SmVvMxjHrVjqwiRjkPJETGw5RRCd9e/lmoh65yMJwL6LubYcxawhaMRwylEwaa9R8kcz8u7q2wDAirISBt1q8be3CDmd5NzOXbF9MlKb69Kzl20esqr+mD8NR6/NIjgvMLANECosxTmMqR2pElHHzYMYxqO72g7Brdbjd38TWIgF5GJ4GFahGWU8QriLasBakU1qFfBaoclX3L/suAO5F9uynPyfoSoApn0wMfcPCPaCvyYfe+zK5dS33zT8I5c3+8ytgEW2KpxRxwCOfWuBPeWVkpRJsn5KdDqiaFa74+UTcRpEXUd5fhwrdASLS5fQR7xJiCXxWftN0h3iTkzVuu8+YJ4yZ9jiN7Eam/wsBQHWmo/DEKBnLELfWCcN8BCwvLJMbooBS7omWmQal67fyiQW9WsfzzptK/0eV5cu9+ggm26kYBOi/FCJV12FvuJgfUUd+k6ClbVk6ctogpZ1qzz11pTISCEkOiTWX1+quWJlb1ze0vevN1uNtA3SHW5yl//bkiGpyE3jmjtz3LlInQIgzDH60TnmTa1J8zw==";
+                "zC/GfP6rqbcWUkE4nlqgDeFAK4jLy5P2N4ec5i040ADosft3twjt1lKhhhVLKI+eW3JUBGF20J8ZBP5D6LoUw7qjBAApD0K/Q5OEjBxna3n6pAGqe9kNP45JscMiHIW81UElkyF2p1fnhb1MVc8g/9dIYKQJRBtFd+OFcz2+2CbmLbI5C4cBHtU+W7bCmAwGVJg4RF1SmVvMxjHrVjqwiRjkPJETGw5RRCd9e/lmoh65yMJwL6LubYcxawhaMRwylEwaa9R8kcz8u7q2wDAirISBt1q8be3CDmd5NzOXbF9MlKb69Kzl20esqr+mD8NR6/NIjgvMLANECosxTmMqR2pElHHzYMYxqO72g7Brdbjd38TWIgF5GJ4GFahGWU8QriLasBakU1qFfBaoclX3L/suAO5F9uynPyfoSoApn0wMfcPCPaCvyYfe+zK5dS33zT8I5c3+8ytgEW2KpxRxwCOfWuBPeWVkpRJsn5KdDqiaFa74+UTcRpEXUd5fhwrdASLS5fQR7xJiCXxWftN0h3iTkzVuu8+YJ4yZ9jiN7Eam/wsBQHWmo/DEKBnLELfWCcN8BCwvLJMbooBS7omWmQal67fyiQW9WsfzzptK/0eV5cu9+ggm26kYBOi/FCJV12FvuJgfUUd+k6ClbVk6ctogpZ1qzz11pTISCEkOiTWX1+quWJlb1ze0vevN1uNtA3SHW5yl//bkiGpyE3jmjtz3LlInQIgzDH60TnmTa1J8zw==";
         byte[] buff = Base64.getDecoder().decode(in);
         FileOutputStream out = new FileOutputStream("/tmp/license.bin2");
         out.write(buff);
         out.close();
 
         String aesKey =
-            "JVQqwdRwRBQTTDHaS6N4/5OCCHx3TkQ2s81B0gew4/2dkgpBPnKd/8tucy6W1iL+6QtPU4/9bGAtEW/Ug15Uj8aKDfr+bJIRqLiPVIOiL9yZFu0G6jcFubXli1n6VMdvE8Z40vbHxzzz9WDtC/BKStJ8190nR8I5JyXpO91gcXob44CZsh78uUDLqRhu/nTqbQ3L+3393oN3RCXoXxwiHCs/mWjYw5rkDqgRa9Lp3fPfliM0oV1jVrj/xaO2xgUQ1TOLe8Q8szESRP6ThsnIz0XDfpowByFSXoLUs3iQC/+UqZvouMnV0eIBGVa+Icn213IG6fWusgOil6OP";
+                "JVQqwdRwRBQTTDHaS6N4/5OCCHx3TkQ2s81B0gew4/2dkgpBPnKd/8tucy6W1iL+6QtPU4/9bGAtEW/Ug15Uj8aKDfr+bJIRqLiPVIOiL9yZFu0G6jcFubXli1n6VMdvE8Z40vbHxzzz9WDtC/BKStJ8190nR8I5JyXpO91gcXob44CZsh78uUDLqRhu/nTqbQ3L+3393oN3RCXoXxwiHCs/mWjYw5rkDqgRa9Lp3fPfliM0oV1jVrj/xaO2xgUQ1TOLe8Q8szESRP6ThsnIz0XDfpowByFSXoLUs3iQC/+UqZvouMnV0eIBGVa+Icn213IG6fWusgOil6OP";
         byte[] aseKeyBuff = Base64.getDecoder().decode(aesKey);
         SecretKeySpec keySpec = new SecretKeySpec(aseKeyBuff, "AES");
         Cipher cipher = Cipher.getInstance("AES");
@@ -191,6 +189,18 @@ public class CipherUtilTest {
         out.write(encoded);
         out.close();
         log.debug(CipherUtil.hexDumpEncoder.encode(encoded));
+    }
+
+    @Test
+    public void testAES_256_ecb_encrypt() throws Exception {
+        // https://hknaruto.blog.csdn.net/article/details/114264969
+        String input = "123456";
+        String key = "12345678901234567890123456789012";
+        byte[] encrypted = CipherUtil.AES_256_ecb_encrypt(input.getBytes(), key.getBytes());
+        log.debug(CipherUtil.hexDumpEncoder.encode(encrypted));
+        byte[] decrypted = CipherUtil.AES_256_ecb_decrypt(encrypted, key.getBytes());
+        String decyptedStr = new String(decrypted);
+        log.debug(decyptedStr);
     }
 
 }
