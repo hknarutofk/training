@@ -7,6 +7,18 @@ spring:
       max-file-size: 1024MB
       # 多个文件最大值
       max-request-size: 1024MB
+  redis:
+    password: xxx
+    sentinel:
+      master: mymaster
+      nodes: 10.0.0.123:26380,10.0.0.179:26380,10.0.0.140:26380
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        max-wait: 60000
+        min-idle: 1
+
   datasource:
     url: jdbc:mysql://10.51.72.167:3306/training
     username: root
@@ -65,23 +77,23 @@ spring:
           db-type: mysql
           log-slow-sql: true
           slow-sql-millis: 2000
-      # 配置WallFilter
+        # 配置WallFilter
         wall:
           enabled: true
           db-type: mysql
           config.delete-allow: false
           config.drop-table-allow: false
-#      目前为以下 Filter 提供了配置支持，请参考文档或者根据IDE提示（spring.datasource.druid.filter.*）进行配置。
-#
-#      StatFilter
-#      WallFilter
-#      ConfigFilter
-#      EncodingConvertFilter
-#      Slf4jLogFilter
-#      Log4jFilter
-#      Log4j2Filter
-#      CommonsLogFilter
-#      要想使自定义 Filter 配置生效需要将对应 Filter 的 enabled 设置为 true ，Druid Spring Boot Starter 默认禁用 StatFilter，你也可以将其 enabled 设置为 true 来启用它。
+  #      目前为以下 Filter 提供了配置支持，请参考文档或者根据IDE提示（spring.datasource.druid.filter.*）进行配置。
+  #
+  #      StatFilter
+  #      WallFilter
+  #      ConfigFilter
+  #      EncodingConvertFilter
+  #      Slf4jLogFilter
+  #      Log4jFilter
+  #      Log4j2Filter
+  #      CommonsLogFilter
+  #      要想使自定义 Filter 配置生效需要将对应 Filter 的 enabled 设置为 true ，Druid Spring Boot Starter 默认禁用 StatFilter，你也可以将其 enabled 设置为 true 来启用它。
   jackson:
     local-date-time-format: yyyy-MM-dd HH:mm:ss
     local-date-format: yyyy-MM-dd
